@@ -1,0 +1,1673 @@
+<!doctype html>
+<html lang="ja" data-theme="classic">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light dark" />
+<link rel="icon" href="data:," />
+<title>数字パズルゲーム</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&family=Zen+Kaku+Gothic+New:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#faf6ef;
+    --bg-board:#b8a88f;
+    --bg-cell:rgba(255,255,255,.28);
+    --surface:#ffffff;
+    --surface-2:#f3ead9;
+    --ink:#2b2118;
+    --ink-soft:#6f6152;
+    --ink-faint:#9a8a76;
+    --line:#e3d7c3;
+    --accent:#e8590c;
+    --accent-ink:#fff;
+    --accent-soft:#fdeadd;
+    --teal:#0f766e;
+    --teal-soft:#d9efec;
+    --gold:#b7791f;
+    --shadow:0 10px 30px rgba(90,64,32,.14);
+    --radius:18px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#171310;
+      --bg-board:#3d342a;
+      --bg-cell:rgba(255,255,255,.07);
+      --surface:#241e19;
+      --surface-2:#2d2620;
+      --ink:#f5ecdf;
+      --ink-soft:#c9bba6;
+      --ink-faint:#8f8070;
+      --line:#3d342a;
+      --accent:#f76707;
+      --accent-soft:#3d2413;
+      --teal:#2dd4bf;
+      --teal-soft:#123331;
+      --gold:#f0b429;
+      --shadow:0 10px 30px rgba(0,0,0,.45);
+    }
+  }
+  /* ---------- themes ---------- */
+  html[data-theme="ocean"]{
+    --bg:#edf3f6; --bg-board:#6f9ab0; --bg-cell:rgba(255,255,255,.32);
+    --surface:#ffffff; --surface-2:#ddeaf0; --ink:#173442; --ink-soft:#4a6b7c;
+    --ink-faint:#7d9aab; --line:#c8dce6; --accent:#0284c7; --accent-soft:#e0f2fe;
+    --teal:#0e7490; --teal-soft:#cffafe; --gold:#b7791f;
+    --shadow:0 10px 30px rgba(23,78,110,.16);
+  }
+  html[data-theme="sakura"]{
+    --bg:#fdf1f3; --bg-board:#d9a3af; --bg-cell:rgba(255,255,255,.34);
+    --surface:#ffffff; --surface-2:#fbe4e9; --ink:#3d222a; --ink-soft:#7a5560;
+    --ink-faint:#b08a94; --line:#f0ccd4; --accent:#e11d63; --accent-soft:#fce7f0;
+    --teal:#be4a6b; --teal-soft:#fde8ee; --gold:#b7791f;
+    --shadow:0 10px 30px rgba(160,60,90,.15);
+  }
+  html[data-theme="forest"]{
+    --bg:#f1f4ea; --bg-board:#8fa07a; --bg-cell:rgba(255,255,255,.30);
+    --surface:#ffffff; --surface-2:#e4ead6; --ink:#26301d; --ink-soft:#5a6b4a;
+    --ink-faint:#8a9a76; --line:#d3ddc0; --accent:#4d7c0f; --accent-soft:#ecfccb;
+    --teal:#2f6b4f; --teal-soft:#d9efe2; --gold:#a16207;
+    --shadow:0 10px 30px rgba(60,80,40,.15);
+  }
+  html[data-theme="neon"]{
+    --bg:#0e0e1a; --bg-board:#23233d; --bg-cell:rgba(255,255,255,.07);
+    --surface:#1a1a2e; --surface-2:#252542; --ink:#f0f0fa; --ink-soft:#b8b8d0;
+    --ink-faint:#7a7a9a; --line:#333355; --accent:#d946ef; --accent-soft:#3b1a4a;
+    --teal:#22d3ee; --teal-soft:#12333d; --gold:#facc15;
+    --shadow:0 10px 30px rgba(0,0,0,.55);
+  }
+  /* tile palettes per theme */
+  html[data-theme="ocean"] .t2{background:#e2f1f7;color:#1d4e63}
+  html[data-theme="ocean"] .t4{background:#c3e6f2;color:#1d4e63}
+  html[data-theme="ocean"] .t8{background:#6fc2e3;color:#fff}
+  html[data-theme="ocean"] .t16{background:#3ea8d2;color:#fff}
+  html[data-theme="ocean"] .t32{background:#2589bd;color:#fff}
+  html[data-theme="ocean"] .t64{background:#176f9e;color:#fff}
+  html[data-theme="ocean"] .t128{background:#7fd1b9;color:#0f3d33;box-shadow:0 0 0 2px rgba(127,209,185,.4)}
+  html[data-theme="ocean"] .t256{background:#4db894;color:#fff;box-shadow:0 0 0 2px rgba(77,184,148,.4)}
+  html[data-theme="ocean"] .t512{background:#2a9d8f;color:#fff}
+  html[data-theme="ocean"] .t1024{background:#1d7a6e;color:#fff}
+  html[data-theme="ocean"] .t2048{background:#0b3d5f;color:#7dd3fc;box-shadow:0 0 22px rgba(2,132,199,.55)}
+  html[data-theme="ocean"] .tbig{background:#0b2436;color:#fde68a}
+
+  html[data-theme="sakura"] .t2{background:#fdeef1;color:#7a3547}
+  html[data-theme="sakura"] .t4{background:#fadce4;color:#7a3547}
+  html[data-theme="sakura"] .t8{background:#f9a8bc;color:#fff}
+  html[data-theme="sakura"] .t16{background:#f47a9d;color:#fff}
+  html[data-theme="sakura"] .t32{background:#e7547e;color:#fff}
+  html[data-theme="sakura"] .t64{background:#d63a66;color:#fff}
+  html[data-theme="sakura"] .t128{background:#f6c177;color:#5c3d12;box-shadow:0 0 0 2px rgba(246,193,119,.45)}
+  html[data-theme="sakura"] .t256{background:#eba94f;color:#5c3d12;box-shadow:0 0 0 2px rgba(235,169,79,.45)}
+  html[data-theme="sakura"] .t512{background:#c86b98;color:#fff}
+  html[data-theme="sakura"] .t1024{background:#a44a7f;color:#fff}
+  html[data-theme="sakura"] .t2048{background:#7c2d4e;color:#ffd6e3;box-shadow:0 0 22px rgba(225,29,99,.45)}
+  html[data-theme="sakura"] .tbig{background:#3d1220;color:#ffd43b}
+
+  html[data-theme="forest"] .t2{background:#e9efdb;color:#435430}
+  html[data-theme="forest"] .t4{background:#d9e5bd;color:#435430}
+  html[data-theme="forest"] .t8{background:#a9c686;color:#fff}
+  html[data-theme="forest"] .t16{background:#84b45c;color:#fff}
+  html[data-theme="forest"] .t32{background:#639e46;color:#fff}
+  html[data-theme="forest"] .t64{background:#4a8434;color:#fff}
+  html[data-theme="forest"] .t128{background:#e3c15c;color:#54440e;box-shadow:0 0 0 2px rgba(227,193,92,.45)}
+  html[data-theme="forest"] .t256{background:#d4a92e;color:#54440e;box-shadow:0 0 0 2px rgba(212,169,46,.45)}
+  html[data-theme="forest"] .t512{background:#5b8c5a;color:#fff}
+  html[data-theme="forest"] .t1024{background:#386641;color:#fff}
+  html[data-theme="forest"] .t2048{background:#1b4332;color:#b7e4c7;box-shadow:0 0 22px rgba(27,67,50,.5)}
+  html[data-theme="forest"] .tbig{background:#14231a;color:#ffd43b}
+
+  html[data-theme="neon"] .t2{background:#1e2a3d;color:#7dd3fc}
+  html[data-theme="neon"] .t4{background:#26354f;color:#bae6fd}
+  html[data-theme="neon"] .t8{background:#0891b2;color:#fff}
+  html[data-theme="neon"] .t16{background:#2563eb;color:#fff}
+  html[data-theme="neon"] .t32{background:#7c3aed;color:#fff}
+  html[data-theme="neon"] .t64{background:#db2777;color:#fff}
+  html[data-theme="neon"] .t128{background:#f59e0b;color:#1c1005;box-shadow:0 0 14px rgba(245,158,11,.5)}
+  html[data-theme="neon"] .t256{background:#f97316;color:#fff;box-shadow:0 0 14px rgba(249,115,22,.5)}
+  html[data-theme="neon"] .t512{background:#22c55e;color:#052e12}
+  html[data-theme="neon"] .t1024{background:#14b8a6;color:#fff}
+  html[data-theme="neon"] .t2048{background:#e879f9;color:#2e1065;box-shadow:0 0 26px rgba(232,121,249,.75)}
+  html[data-theme="neon"] .tbig{background:#000;color:#fef08a;box-shadow:0 0 14px rgba(254,240,138,.4)}
+
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"Zen Kaku Gothic New", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  button{font-family:inherit; cursor:pointer; min-height:44px;}
+  .wrap{max-width:560px;margin:0 auto;padding:20px 16px 40px;}
+
+  /* ---------- header ---------- */
+  .top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .title-block h1{
+    margin:0;font-size:34px;line-height:1.05;font-weight:900;letter-spacing:.02em;
+  }
+  .title-block h1 .num{color:var(--accent)}
+  .title-block p{margin:6px 0 0;color:var(--ink-soft);font-size:13.5px;line-height:1.5;font-weight:500}
+  .scores{display:flex;gap:8px}
+  .score-box{
+    background:var(--surface);border:1px solid var(--line);border-radius:12px;
+    padding:8px 14px 7px;min-width:92px;text-align:center;box-shadow:var(--shadow);
+    position:relative;overflow:visible;
+  }
+  .score-box .label{font-size:10.5px;font-weight:900;letter-spacing:.14em;color:var(--ink-faint)}
+  .score-box .value{font-family:"M PLUS Rounded 1c",sans-serif;font-size:24px;font-weight:800;line-height:1.15;font-variant-numeric:tabular-nums}
+  .score-add{
+    position:absolute;left:50%;top:2px;transform:translateX(-50%);
+    font-family:"M PLUS Rounded 1c",sans-serif;font-weight:800;color:var(--accent);
+    font-size:16px;pointer-events:none;opacity:0;white-space:nowrap;
+  }
+  .score-add.show{animation:floatUp .8s ease-out forwards}
+  @keyframes floatUp{
+    0%{opacity:0;transform:translate(-50%,6px)}
+    20%{opacity:1}
+    100%{opacity:0;transform:translate(-50%,-22px)}
+  }
+
+  /* ---------- toolbar ---------- */
+  .toolbar{display:flex;gap:8px;margin:16px 0 12px;flex-wrap:wrap}
+  .btn{
+    border:1px solid var(--line);background:var(--surface);color:var(--ink);
+    border-radius:999px;padding:0 18px;font-size:14px;font-weight:700;
+    display:inline-flex;align-items:center;gap:7px;min-height:44px;
+  }
+  .btn:active{transform:scale(.97)}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+  .btn:disabled{opacity:.38;cursor:default}
+  .btn:disabled:active{transform:none}
+  .btn svg{width:17px;height:17px;flex:none}
+  .toolbar .spacer{flex:1}
+  .lang-switch{display:inline-flex;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:3px;gap:2px;min-height:44px;align-items:center}
+  .lang-switch button{border:0;background:transparent;color:var(--ink-soft);border-radius:999px;padding:0 14px;min-height:36px;font-size:13.5px;font-weight:800;letter-spacing:.02em}
+  .lang-switch button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+  .lang-switch button:active{transform:scale(.97)}
+
+  /* ---------- theme picker ---------- */
+  .theme-bar{
+    display:flex;align-items:center;gap:10px 12px;flex-wrap:wrap;
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    padding:12px 14px;box-shadow:var(--shadow);margin-bottom:14px;
+  }
+  .theme-label{font-size:12px;font-weight:900;letter-spacing:.08em;color:var(--ink-soft);display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+  .theme-label svg{width:16px;height:16px;color:var(--accent)}
+  .theme-options{display:flex;gap:8px;flex-wrap:wrap;flex:1}
+  .theme-btn{
+    display:inline-flex;align-items:center;gap:8px;
+    border:1.5px solid var(--line);background:var(--surface-2);color:var(--ink);
+    border-radius:999px;padding:5px 13px 5px 9px;min-height:40px;
+    font-size:13px;font-weight:800;line-height:1;
+  }
+  .theme-btn:active{transform:scale(.97)}
+  .theme-btn[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);box-shadow:0 0 0 1px var(--accent)}
+  .theme-btn .swatches{display:inline-flex;align-items:center;flex:none}
+  .theme-btn .swatches i{width:16px;height:16px;border-radius:50%;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.25);margin-left:-6px;display:block}
+  .theme-btn .swatches i:first-child{margin-left:0}
+  @media (max-width:420px){ .theme-btn{font-size:12.5px;padding-right:11px} }
+
+  /* ---------- progress ---------- */
+  .progress-card{
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    padding:12px 16px 14px;box-shadow:var(--shadow);margin-bottom:14px;
+  }
+  .progress-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+  .progress-head .ph-label{font-size:12px;font-weight:900;letter-spacing:.08em;color:var(--ink-soft)}
+  .progress-head .ph-now{font-size:13px;color:var(--ink-soft);font-weight:700}
+  .progress-head .ph-now b{font-family:"M PLUS Rounded 1c",sans-serif;font-size:17px;color:var(--ink)}
+  .track{display:flex;gap:5px;margin-top:9px}
+  .seg{flex:1;height:9px;border-radius:99px;background:var(--surface-2);border:1px solid var(--line);position:relative}
+  .seg.on{border-color:transparent}
+  .seg-labels{display:flex;gap:5px;margin-top:5px}
+  .seg-labels span{flex:1;text-align:center;font-size:10.5px;font-weight:700;color:var(--ink-faint);font-family:"M PLUS Rounded 1c",sans-serif}
+  .seg-labels span.on{color:var(--ink)}
+
+  /* ---------- board ---------- */
+  .board-wrap{position:relative}
+  .board{
+    background:var(--bg-board);border-radius:20px;padding:10px;
+    display:grid;grid-template-columns:repeat(4,1fr);gap:10px;
+    aspect-ratio:1/1;touch-action:none;user-select:none;-webkit-user-select:none;
+    box-shadow:var(--shadow);position:relative;
+  }
+  .cell{
+    background:var(--bg-cell);border-radius:12px;position:relative;
+  }
+  .tile{
+    position:absolute;inset:0;border-radius:12px;
+    display:flex;align-items:center;justify-content:center;
+    font-family:"M PLUS Rounded 1c",sans-serif;font-weight:800;
+    font-variant-numeric:tabular-nums;line-height:1;
+  }
+  .tile span{display:block}
+  .tile.new{animation:spawn .18s ease-out}
+  .tile.merged{animation:pop .22s ease-out}
+  @keyframes spawn{0%{transform:scale(.4);opacity:0}100%{transform:scale(1);opacity:1}}
+  @keyframes pop{0%{transform:scale(1)}45%{transform:scale(1.16)}100%{transform:scale(1)}}
+  .t2{background:#f6ead2;color:#6b5836}.t4{background:#f0dcb2;color:#6b5836}
+  .t8{background:#f5a65b;color:#fff}.t16{background:#ef843c;color:#fff}
+  .t32{background:#e8634a;color:#fff}.t64{background:#d9482f;color:#fff}
+  .t128{background:#ecc94b;color:#5c4a12;box-shadow:0 0 0 2px rgba(236,201,75,.35)}
+  .t256{background:#e3b93e;color:#5c4a12;box-shadow:0 0 0 2px rgba(227,185,62,.4)}
+  .t512{background:#5fb878;color:#fff}.t1024{background:#2f9e6e;color:#fff}
+  .t2048{background:#0f766e;color:#fff;box-shadow:0 0 22px rgba(15,118,110,.55)}
+  .tbig{background:#2b2118;color:#ffd43b}
+  @media (prefers-color-scheme: dark){
+    .t2{background:#4a3f30;color:#efe3cb}.t4{background:#5d4c33;color:#f5ead2}
+    .tbig{background:#f5ecdf;color:#8a5a00}
+  }
+  .fs-2{font-size:clamp(26px,9vw,44px)}
+  .fs-3{font-size:clamp(22px,7.6vw,38px)}
+  .fs-4{font-size:clamp(17px,6vw,30px)}
+  .fs-5{font-size:clamp(13px,4.6vw,23px)}
+
+  .overlay{
+    position:absolute;inset:0;border-radius:20px;z-index:5;
+    background:color-mix(in srgb, var(--bg) 72%, transparent);
+    backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
+    display:none;align-items:center;justify-content:center;text-align:center;padding:20px;
+  }
+  .overlay.show{display:flex;animation:overlayIn .35s ease-out}
+  @keyframes overlayIn{from{opacity:0}to{opacity:1}}
+  .overlay .box h2{margin:0 0 6px;font-size:30px;font-weight:900}
+  .overlay .box p{margin:0 0 16px;color:var(--ink-soft);font-size:14.5px;line-height:1.6;font-weight:500}
+  .overlay .final-score{font-family:"M PLUS Rounded 1c",sans-serif;font-size:15px;font-weight:800;color:var(--accent);margin-bottom:4px}
+  .overlay .btns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+  .btn.reward{background:var(--teal);border-color:var(--teal);color:#fff}
+  .btn.reward svg{width:16px;height:16px}
+  .revive-note{margin:10px 0 0 !important;font-size:12.5px !important;color:var(--ink-faint) !important;line-height:1.5 !important}
+  .revive-toast{
+    position:absolute;top:10px;left:50%;transform:translateX(-50%);z-index:6;
+    background:var(--teal);color:#fff;font-size:13px;font-weight:800;
+    padding:8px 14px;border-radius:999px;box-shadow:var(--shadow);
+    display:none;white-space:nowrap;pointer-events:none;
+  }
+  .revive-toast.show{display:block;animation:overlayIn .3s ease-out}
+
+  /* ---------- rewarded ad (sample) ---------- */
+  .ad-modal{
+    position:fixed;inset:0;z-index:60;background:rgba(20,14,8,.62);
+    display:none;align-items:center;justify-content:center;padding:16px;
+  }
+  .ad-modal.show{display:flex}
+  .ad-card{
+    background:var(--surface);border:1px solid var(--line);border-radius:18px;
+    width:100%;max-width:440px;overflow:hidden;box-shadow:var(--shadow);
+  }
+  .ad-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line)}
+  .ad-badge{font-size:11px;font-weight:900;letter-spacing:.08em;background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:4px 10px;color:var(--ink-soft)}
+  .ad-count{font-family:"M PLUS Rounded 1c",sans-serif;font-size:13px;font-weight:800;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+  .ad-creative{
+    background:var(--surface-2);min-height:218px;padding:26px 20px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:10px;
+  }
+  .ad-play{
+    width:62px;height:62px;border-radius:50%;background:var(--accent);color:#fff;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .ad-play svg{width:26px;height:26px;margin-left:3px}
+  .ad-creative .ad-title{font-size:19px;font-weight:900;line-height:1.35}
+  .ad-creative .ad-desc{font-size:13px;color:var(--ink-soft);line-height:1.6;font-weight:500;max-width:300px}
+  .ad-progress{height:6px;background:var(--surface-2)}
+  .ad-progress-bar{height:100%;width:0%;background:var(--accent)}
+  .ad-body{padding:14px 16px 16px}
+  .ad-status{margin:0 0 12px;font-size:13.5px;color:var(--ink-soft);line-height:1.6;font-weight:500;text-align:center}
+  .ad-status.done{color:var(--teal);font-weight:800}
+  .ad-btns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+
+  /* ---------- store (remove ads) ---------- */
+  .btn.store{border-color:var(--gold);color:var(--gold)}
+  .btn.store.owned{border-color:var(--teal);background:var(--teal-soft);color:var(--teal)}
+  .store-hero{gap:12px}
+  .store-play{background:var(--gold)}
+  .store-price{font-family:"M PLUS Rounded 1c",sans-serif;font-size:30px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+  .store-benefits{list-style:none;margin:2px 0 0;padding:0;width:100%;max-width:330px;display:flex;flex-direction:column;gap:8px;text-align:left}
+  .store-benefits li{display:flex;gap:9px;align-items:flex-start;font-size:13.5px;font-weight:700;line-height:1.55;color:var(--ink)}
+  .store-benefits svg{width:17px;height:17px;flex:none;color:var(--teal);margin-top:2px}
+  .store-check{width:62px;height:62px;border-radius:50%;background:var(--teal);color:#fff;display:flex;align-items:center;justify-content:center}
+  .store-check svg{width:30px;height:30px}
+
+  /* ---------- ranking ---------- */
+  .ranking-card{max-height:88dvh;display:flex;flex-direction:column}
+  .ranking-count{font-family:"M PLUS Rounded 1c",sans-serif;font-size:12.5px;font-weight:800;color:var(--ink-soft);font-variant-numeric:tabular-nums;margin-left:auto;margin-right:10px}
+  .ranking-body{overflow-y:auto;padding:14px 16px 16px;-webkit-overflow-scrolling:touch}
+  .ranking-note{margin:0 0 12px;font-size:12.5px;color:var(--ink-soft);line-height:1.65;font-weight:500}
+  .ranking-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+  .rank-row{display:flex;align-items:center;gap:11px;background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:9px 12px}
+  .rank-row.latest{border-color:var(--accent);background:var(--accent-soft)}
+  .rank-num{width:34px;height:34px;flex:none;border-radius:50%;background:var(--surface);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-family:"M PLUS Rounded 1c",sans-serif;font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--ink-soft)}
+  .rank-pos-1 .rank-num{background:#f6c945;border-color:#d9a514;color:#4a3200}
+  .rank-pos-2 .rank-num{background:#e8e8ec;border-color:#b9b9c4;color:#3c3c48}
+  .rank-pos-3 .rank-num{background:#f0c297;border-color:#cf8a4e;color:#5b3410}
+  .rank-main{flex:1;min-width:0}
+  .rank-score{font-family:"M PLUS Rounded 1c",sans-serif;font-size:20px;font-weight:800;line-height:1.1;font-variant-numeric:tabular-nums}
+  .rank-meta{font-size:11.5px;color:var(--ink-soft);font-weight:700;margin-top:2px;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .rank-new{flex:none;font-size:10px;font-weight:900;letter-spacing:.07em;background:var(--accent);color:var(--accent-ink);border-radius:999px;padding:3px 8px}
+  .ranking-empty{padding:30px 14px;text-align:center;color:var(--ink-soft);font-size:13.5px;line-height:1.7;font-weight:500;background:var(--surface-2);border:1px dashed var(--line);border-radius:12px}
+
+  /* ---------- stats strip ---------- */
+  .stats{display:flex;gap:8px;margin-top:14px}
+  .stat{
+    flex:1;background:var(--surface);border:1px solid var(--line);border-radius:12px;
+    padding:9px 6px 8px;text-align:center;
+  }
+  .stat .v{font-family:"M PLUS Rounded 1c",sans-serif;font-size:19px;font-weight:800;font-variant-numeric:tabular-nums}
+  .stat .l{font-size:10.5px;font-weight:900;letter-spacing:.1em;color:var(--ink-faint);margin-top:1px}
+
+  /* ---------- dpad ---------- */
+  .dpad{display:grid;margin:18px auto 0;width:186px;grid-template-columns:repeat(3,58px);grid-template-rows:repeat(3,52px);gap:6px;justify-content:center}
+  .dpad button{
+    border:1px solid var(--line);background:var(--surface);border-radius:12px;min-height:52px;
+    display:flex;align-items:center;justify-content:center;color:var(--ink);
+  }
+  .dpad button:active{background:var(--accent-soft);color:var(--accent)}
+  .dpad svg{width:22px;height:22px}
+  .dpad .up{grid-column:2}.dpad .left{grid-column:1;grid-row:2}.dpad .right{grid-column:3;grid-row:2}.dpad .down{grid-column:2;grid-row:3}
+  .dpad .mid{grid-column:2;grid-row:2;background:var(--surface-2);border-radius:50%;margin:8px}
+
+  /* ---------- how to ---------- */
+  .howto{
+    margin-top:22px;background:var(--surface);border:1px solid var(--line);
+    border-radius:var(--radius);padding:18px 18px 8px;box-shadow:var(--shadow);
+  }
+  .howto h2{margin:0 0 4px;font-size:17px;font-weight:900}
+  .howto p{margin:0 0 12px;font-size:13.5px;color:var(--ink-soft);line-height:1.7;font-weight:500}
+  .howto ol{margin:0 0 14px;padding-left:20px;font-size:13.5px;line-height:1.9;color:var(--ink-soft);font-weight:500}
+  .howto ol b{color:var(--ink)}
+  .keys{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+  .key{
+    border:1px solid var(--line);border-bottom-width:3px;border-radius:8px;background:var(--surface-2);
+    padding:4px 10px;font-size:12px;font-weight:700;font-family:"M PLUS Rounded 1c",sans-serif;
+  }
+  .chain{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:4px 0 16px}
+  .chain .mini{
+    width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;
+    font-family:"M PLUS Rounded 1c",sans-serif;font-weight:800;font-size:15px;position:relative;
+  }
+  .chain .arrow{color:var(--ink-faint);font-weight:900}
+  .note{
+    margin-top:14px;font-size:12px;color:var(--ink-faint);line-height:1.7;font-weight:500;text-align:center;
+  }
+  @media (max-width:420px){
+    .title-block h1{font-size:29px}
+    .score-box{min-width:82px;padding:7px 10px 6px}
+    .score-box .value{font-size:21px}
+    .board{gap:8px;padding:8px}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .tile.new,.tile.merged,.score-add.show,.overlay.show{animation:none}
+    .btn:active{transform:none}
+  }
+
+  /* ---------- app layout: single screen, no page scroll ---------- */
+  html,body{height:100%}
+  body{
+    height:100dvh;overflow:hidden;overscroll-behavior:none;
+  }
+  .wrap{
+    height:100dvh;max-width:480px;margin:0 auto;
+    padding:calc(10px + env(safe-area-inset-top)) 14px calc(10px + env(safe-area-inset-bottom));
+    display:flex;flex-direction:column;gap:8px;
+  }
+  /* header: compact, one row */
+  .top{align-items:center;flex-wrap:nowrap}
+  .title-block{min-width:0;flex:1 1 auto}
+  .title-block h1{font-size:clamp(18px,5.2vw,22px);white-space:nowrap}
+  .title-block p{font-size:11.5px;margin-top:2px;line-height:1.4}
+  .scores{gap:6px;flex:none}
+  .score-box{min-width:70px;padding:5px 10px 4px;border-radius:10px;box-shadow:none}
+  .score-box .label{font-size:9.5px}
+  .score-box .value{font-size:19px}
+  /* toolbar: one compact row */
+  .toolbar{margin:0;flex-wrap:nowrap;gap:6px;align-items:center}
+  .toolbar .btn{min-height:38px;padding:0 12px;font-size:13px;white-space:nowrap}
+  .lang-switch{min-height:38px;padding:2px;flex:none}
+  .lang-switch button{min-height:32px;padding:0 10px;font-size:12px}
+  .icon-btn{
+    width:38px;height:38px;min-width:38px;min-height:38px;padding:0 !important;
+    border-radius:50% !important;justify-content:center;flex:none;
+  }
+  .icon-btn svg{width:18px;height:18px}
+  /* theme bar: compact chips + icon buttons */
+  .theme-bar{
+    margin:0;padding:6px 8px;border-radius:12px;box-shadow:none;
+    gap:6px;flex-wrap:nowrap;overflow:hidden;
+  }
+  .theme-label{font-size:11px;gap:4px}
+  .theme-label svg{width:14px;height:14px}
+  .theme-options{flex-wrap:nowrap;gap:5px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .theme-options::-webkit-scrollbar{display:none}
+  .theme-btn{min-height:32px;padding:3px 9px 3px 6px;font-size:11.5px;gap:5px;white-space:nowrap}
+  .theme-btn .swatches i{width:12px;height:12px;border-width:1.5px}
+  .theme-bar .icon-btn{width:32px;height:32px;min-width:32px;min-height:32px}
+  .theme-bar .icon-btn svg{width:16px;height:16px}
+  /* progress: slim */
+  .progress-card{margin:0;padding:7px 12px 8px;border-radius:12px;box-shadow:none}
+  .progress-head .ph-label{font-size:11px}
+  .progress-head .ph-now{font-size:12px}
+  .progress-head .ph-now b{font-size:15px}
+  .track{margin-top:6px}
+  .seg{height:7px}
+  .seg-labels{margin-top:3px}
+  .seg-labels span{font-size:9.5px}
+  /* fixed rows keep their height; only the board area flexes */
+  .top,.toolbar,.theme-bar,.progress-card,.stats,.dpad{flex:none}
+  /* board: fills the leftover space, always fits */
+  .board-wrap{flex:1 1 auto;min-height:0;display:flex;align-items:center;justify-content:center;container-type:size}
+  .board{
+    width:min(100%,440px,calc(100dvh - 430px));
+    width:min(100%,440px,100cqh);
+    gap:8px;padding:8px;border-radius:16px;
+  }
+  .tile,.cell{border-radius:10px}
+  .overlay{border-radius:16px}
+  /* stats: slim strip */
+  .stats{margin:0;gap:6px}
+  .stat{padding:5px 4px 4px;border-radius:10px}
+  .stat .v{font-size:16px}
+  .stat .l{font-size:9px}
+  /* dpad: compact cross */
+  .dpad{
+    margin:0 auto;width:138px;
+    grid-template-columns:repeat(3,42px);grid-template-rows:repeat(3,38px);gap:5px;
+  }
+  .dpad button{min-height:38px;border-radius:10px}
+  .dpad svg{width:18px;height:18px}
+  .dpad .mid{margin:6px}
+  /* help modal: how-to lives here, scrolls inside the sheet only */
+  .help-card{max-height:88dvh;display:flex;flex-direction:column}
+  .help-close{
+    border:1px solid var(--line);background:var(--surface);color:var(--ink);
+    width:36px;height:36px;min-height:36px;border-radius:50%;flex:none;
+    display:inline-flex;align-items:center;justify-content:center;padding:0;
+  }
+  .help-close svg{width:17px;height:17px}
+  .help-scroll{overflow-y:auto;padding:16px 18px 18px;-webkit-overflow-scrolling:touch}
+  .help-scroll .howto{margin:0;border:0;box-shadow:none;padding:0;background:transparent}
+  .help-scroll .note{margin:14px 0 0}
+  /* short screens (small phones): tighten further */
+  @media (max-height:760px){
+    .wrap{gap:6px;padding-top:calc(6px + env(safe-area-inset-top));padding-bottom:calc(6px + env(safe-area-inset-bottom))}
+    .title-block p{display:none}
+    .title-block h1{font-size:20px}
+    .board{width:min(100%,440px,calc(100dvh - 336px));width:min(100%,440px,100cqh)}
+    .seg-labels{display:none}
+    .progress-card{padding-bottom:7px}
+    .dpad{width:120px;grid-template-columns:repeat(3,36px);grid-template-rows:repeat(3,32px);gap:4px}
+    .dpad button{min-height:32px}
+    .dpad svg{width:16px;height:16px}
+  }
+  @media (max-width:400px){
+    .toolbar .btn{padding:0 9px;font-size:12.5px}
+    .lang-switch button{padding:0 8px}
+    #storeBtnLabel{letter-spacing:-.02em}
+  }
+</style>
+</head>
+<body>
+<main class="wrap">
+
+  <div class="top">
+    <div class="title-block">
+      <h1><span id="titleText">数字パズル</span> <span class="num">2048</span></h1>
+      <p id="subtitle">同じ数字をくっつけて大きくしよう。<br>目標は <b>2048</b> のタイルを作ること。</p>
+    </div>
+    <div class="scores">
+      <div class="score-box">
+        <div class="label">SCORE</div>
+        <div class="value" id="score">0</div>
+        <div class="score-add" id="scoreAdd"></div>
+      </div>
+      <div class="score-box">
+        <div class="label">BEST</div>
+        <div class="value" id="best">0</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <button class="btn primary" id="newGameBtn" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
+      <span id="newGameLabel">新しいゲーム</span>
+    </button>
+    <button class="btn store" id="storeBtn" type="button">
+      <svg id="storeIconAd" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M10.2 9.3v5.4L15 12z" fill="currentColor" stroke="none"/><line x1="4.5" y1="19.5" x2="19.5" y2="4.5"/></svg>
+      <svg id="storeIconCheck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:none"><path d="M20 6 9 17l-5-5"/></svg>
+      <span id="storeBtnLabel">広告を消す</span>
+    </button>
+    <div class="spacer"></div>
+    <div class="lang-switch" role="group" aria-label="Language / 言語">
+      <button type="button" id="langJaBtn" aria-pressed="true">日本語</button>
+      <button type="button" id="langEnBtn" aria-pressed="false">English</button>
+    </div>
+  </div>
+
+  <div class="theme-bar" id="themeBar">
+    <span class="theme-label" id="themeLabel">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="8.5" cy="10" r="1.15" fill="currentColor" stroke="none"/><circle cx="12" cy="7.5" r="1.15" fill="currentColor" stroke="none"/><circle cx="15.5" cy="10" r="1.15" fill="currentColor" stroke="none"/><path d="M12 21a2.6 2.6 0 0 0 2.6-2.6c0-.8-.4-1.4-.9-1.9-.5-.6-.7-1-.7-1.7"/></svg>
+      <span id="themeLabelText">テーマ</span>
+    </span>
+    <div class="theme-options" role="group" id="themeOptions" aria-label="テーマ">
+      <button type="button" class="theme-btn" data-theme-btn="classic" aria-pressed="true"><span class="swatches" aria-hidden="true"><i style="background:#f6ead2"></i><i style="background:#f5a65b"></i><i style="background:#e8634a"></i><i style="background:#0f766e"></i></span><span data-theme-name="classic">クラシック</span></button>
+      <button type="button" class="theme-btn" data-theme-btn="ocean" aria-pressed="false"><span class="swatches" aria-hidden="true"><i style="background:#e2f1f7"></i><i style="background:#6fc2e3"></i><i style="background:#2589bd"></i><i style="background:#0b3d5f"></i></span><span data-theme-name="ocean">オーシャン</span></button>
+      <button type="button" class="theme-btn" data-theme-btn="sakura" aria-pressed="false"><span class="swatches" aria-hidden="true"><i style="background:#fdeef1"></i><i style="background:#f9a8bc"></i><i style="background:#e7547e"></i><i style="background:#7c2d4e"></i></span><span data-theme-name="sakura">さくら</span></button>
+      <button type="button" class="theme-btn" data-theme-btn="forest" aria-pressed="false"><span class="swatches" aria-hidden="true"><i style="background:#e9efdb"></i><i style="background:#a9c686"></i><i style="background:#639e46"></i><i style="background:#1b4332"></i></span><span data-theme-name="forest">フォレスト</span></button>
+      <button type="button" class="theme-btn" data-theme-btn="neon" aria-pressed="false"><span class="swatches" aria-hidden="true"><i style="background:#0891b2"></i><i style="background:#7c3aed"></i><i style="background:#db2777"></i><i style="background:#e879f9"></i></span><span data-theme-name="neon">ネオン</span></button>
+    </div>
+    <button class="btn icon-btn" id="soundBtn" type="button" aria-pressed="true" aria-label="音あり">
+      <svg id="soundOnIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9.4 9.4 0 0 1 0 13"/></svg>
+      <svg id="soundOffIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:none"><path d="M11 5 6 9H2v6h4l5 4z"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+      <span id="soundLabel" hidden>音あり</span>
+    </button>
+    <button class="btn icon-btn" id="rankingBtn" type="button" aria-label="ランキング">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+    </button>
+    <button class="btn icon-btn" id="helpBtn" type="button" aria-label="あそびかた">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.4 9.2A2.7 2.7 0 0 1 12 7.5c1.5 0 2.7 1.1 2.7 2.5 0 1.7-2.4 2-2.7 3.5"/><circle cx="12" cy="17.2" r=".4" fill="currentColor"/></svg>
+    </button>
+  </div>
+
+  <div class="progress-card" id="progressCard" aria-label="2048までの進み具合">
+    <div class="progress-head">
+      <span class="ph-label" id="progressLabel">2048 までの道のり</span>
+      <span class="ph-now"><span id="maxTileText">最大タイル</span> <b id="maxTileLabel">–</b></span>
+    </div>
+    <div class="track" id="track"></div>
+    <div class="seg-labels" id="trackLabels"></div>
+  </div>
+
+  <div class="board-wrap">
+    <div class="board" id="board" role="application" aria-label="ゲーム盤面。スワイプか矢印キーでタイルを動かします"></div>
+    <div class="overlay" id="overlay">
+      <div class="box">
+        <div class="final-score" id="overlayScore"></div>
+        <h2 id="overlayTitle">ゲームオーバー</h2>
+        <p id="overlayText"></p>
+        <div class="btns">
+          <button class="btn primary" id="overlayMainBtn" type="button">もう一度あそぶ</button>
+          <button class="btn reward" id="overlayReviveBtn" type="button" style="display:none">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>
+            <span id="reviveBtnLabel">広告を見て復活</span>
+          </button>
+          <button class="btn" id="overlaySubBtn" type="button" style="display:none">このまま続ける</button>
+        </div>
+        <p class="revive-note" id="reviveNote" style="display:none">広告を見ると、詰む少し手前の状態から<br>スコア・盤面そのままで再開できます。</p>
+      </div>
+    </div>
+    <div class="revive-toast" id="reviveToast" role="status"></div>
+  </div>
+
+  <div class="ad-modal" id="adModal" role="dialog" aria-modal="true" aria-label="広告">
+    <div class="ad-card">
+      <div class="ad-head">
+        <span class="ad-badge" id="adBadge">広告 ・ サンプル</span>
+        <span class="ad-count" id="adCountdown">あと 5 秒</span>
+      </div>
+      <div class="ad-creative">
+        <div class="ad-play" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5z"/></svg></div>
+        <div class="ad-title" id="adTitle">ここに広告が入ります</div>
+        <div class="ad-desc" id="adDesc">試作版ではサンプル広告を表示しています。本番ではここに動画広告が流れ、見終わると復活できます。</div>
+      </div>
+      <div class="ad-progress"><div class="ad-progress-bar" id="adProgressBar"></div></div>
+      <div class="ad-body">
+        <p class="ad-status" id="adStatus">広告を再生中です。終わるまでお待ちください…</p>
+        <div class="ad-btns">
+          <button class="btn" id="adCancelBtn" type="button">やめる</button>
+          <button class="btn reward" id="adReviveBtn" type="button" disabled>復活する</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ad-modal" id="storeModal" role="dialog" aria-modal="true" aria-label="広告を消す（課金）">
+    <div class="ad-card">
+      <div class="ad-head">
+        <span class="ad-badge" id="storeBadge">課金 ・ サンプル</span>
+        <span class="ad-count" id="storeKind">買い切り</span>
+      </div>
+      <div id="storeMain">
+        <div class="ad-creative store-hero">
+          <div class="ad-play store-play" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M10.2 9.3v5.4L15 12z" fill="currentColor" stroke="none"/><line x1="4.5" y1="19.5" x2="19.5" y2="4.5"/></svg></div>
+          <div class="ad-title" id="storeTitle">広告を消して、快適にあそぶ</div>
+          <div class="store-price" id="storePrice">¥480</div>
+          <ul class="store-benefits">
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span id="storeBenefit1">再スタート時の広告が出なくなります</span></li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span id="storeBenefit2">ゲームオーバーの復活が、広告なしで使えます</span></li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span id="storeBenefit3">一度の購入でずっと有効（買い切り）</span></li>
+          </ul>
+        </div>
+        <div class="ad-body">
+          <p class="ad-status" id="storeNote">試作版では疑似購入です。実際のお支払いは発生しません（アプリ版ではApp Storeの課金に接続します）。</p>
+          <div class="ad-btns">
+            <button class="btn" id="storeCancelBtn" type="button">やめる</button>
+            <button class="btn primary" id="storeBuyBtn" type="button">¥480 で購入する</button>
+          </div>
+        </div>
+      </div>
+      <div id="storeDone" style="display:none">
+        <div class="ad-creative store-hero">
+          <div class="store-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+          <div class="ad-title" id="storeDoneTitle">購入が完了しました</div>
+          <div class="ad-desc" id="storeDoneDesc">広告は表示されなくなります。復活も広告を見ずに使えます。</div>
+        </div>
+        <div class="ad-body">
+          <div class="ad-btns">
+            <button class="btn primary" id="storeCloseBtn" type="button">閉じる</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ad-modal" id="rankingModal" role="dialog" aria-modal="true" aria-label="ランキング">
+    <div class="ad-card ranking-card">
+      <div class="ad-head">
+        <span class="ad-badge" id="rankingBadge">ランキング</span>
+        <span class="ranking-count" id="rankingCount"></span>
+        <button class="help-close" id="rankingCloseBtn" type="button" aria-label="閉じる">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="ranking-body">
+        <p class="ranking-note" id="rankingNote">ゲームオーバーになると、そのゲームのスコアが自動で追加されます。</p>
+        <div class="ranking-empty" id="rankingEmpty">まだ記録がありません。<br>まずは1ゲーム、最後まで遊んでみてください。</div>
+        <ol class="ranking-list" id="rankingList"></ol>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="v" id="statMoves">0</div><div class="l" id="statMovesLabel">手数</div></div>
+    <div class="stat"><div class="v" id="statMerges">0</div><div class="l" id="statMergesLabel">合体回数</div></div>
+    <div class="stat"><div class="v" id="statMax">–</div><div class="l" id="statMaxLabel">最大タイル</div></div>
+    <div class="stat"><div class="v" id="statRevives">0</div><div class="l" id="statRevivesLabel">復活</div></div>
+    <div class="stat"><div class="v" id="statTime">0:00</div><div class="l" id="statTimeLabel">経過時間</div></div>
+  </div>
+
+  <div class="dpad" id="dpad" aria-label="方向ボタン">
+    <button type="button" class="up" data-dir="up" data-dir-label="up" aria-label="上へ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg></button>
+    <button type="button" class="left" data-dir="left" data-dir-label="left" aria-label="左へ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
+    <div class="mid"></div>
+    <button type="button" class="right" data-dir="right" data-dir-label="right" aria-label="右へ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></button>
+    <button type="button" class="down" data-dir="down" data-dir-label="down" aria-label="下へ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>
+  </div>
+
+  <div class="ad-modal" id="helpModal" role="dialog" aria-modal="true" aria-label="あそびかた">
+    <div class="ad-card help-card">
+      <div class="ad-head">
+        <span class="ad-badge" id="helpBadge">あそびかた</span>
+        <button class="help-close" id="helpCloseBtn" type="button" aria-label="閉じる">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="help-scroll">
+  <section class="howto">
+    <h2 id="howtoTitle">あそびかた</h2>
+    <ol id="howtoList">
+      <li>盤面を<b>スワイプ</b>（PCは矢印キー）すると、タイルが全部その方向へ滑ります。</li>
+      <li>同じ数字どうしがぶつかると<b>合体して2倍</b>になります。2＋2＝4、4＋4＝8…</li>
+      <li>1手ごとに新しいタイル（2か4）が空きマスに現れます。</li>
+      <li><b>2048</b>を作ればクリア。動かせる手がなくなるとゲームオーバーです。</li>
+      <li>ゲームオーバーになっても、<b>広告を見れば5手前</b>から復活できます。スコアと経過時間もその時点のものに戻ります（試作版では5秒のサンプル広告が流れます）。</li>
+      <li>「もう一度あそぶ」で再スタートするときは、<b>3回に1回</b>広告が表示されてから新しいゲームが始まります。</li>
+      <li>上の<b>テーマ</b>から、盤面とタイルの色をいつでも切り替えられます。プレイ中の盤面やスコアはそのまま引き継がれます。</li>
+      <li>「<b>広告を消す</b>」を購入すると、再スタート時の広告がなくなり、復活も広告なしで使えるようになります（試作版では疑似購入で、お支払いは発生しません）。</li>
+      <li>上の<b>ランキング</b>ボタンから、これまでのスコア順位を確認できます。ゲームオーバーになると自動で記録されます。</li>
+    </ol>
+    <div class="chain" aria-hidden="true">
+      <div class="mini t2">2</div><span class="arrow">＋</span>
+      <div class="mini t2">2</div><span class="arrow">→</span>
+      <div class="mini t4">4</div><span class="arrow">＋</span>
+      <div class="mini t4">4</div><span class="arrow">→</span>
+      <div class="mini t8">8</div><span class="arrow">→</span>
+      <div class="mini t16">16</div><span class="arrow">→</span>
+      <div class="mini t32">32</div><span class="arrow">→</span>
+      <div class="mini t64">64</div><span class="arrow">→</span>
+      <span class="arrow">…</span><span class="arrow">→</span>
+      <div class="mini t2048">2048</div>
+    </div>
+    <p id="tipText">コツ：いちばん大きい数字は<b>角に固定</b>して、そこから小さい順に並べていくと崩れにくくなります。</p>
+    <div class="keys">
+      <span class="key">↑ ↓ ← →</span><span class="key">W A S D</span><span class="key" id="keySwipe">スワイプ</span><span class="key" id="keyDpad">方向ボタン</span>
+    </div>
+  </section>
+
+  <p class="note" id="footerNote">試作版です。遊んでみて「もっとこうしたい」があれば教えてください（制限時間モード、盤面サイズ変更、ランキングなど追加できます）。</p>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+(function(){
+  "use strict";
+  var SIZE = 4;
+  var MILESTONES = [128, 256, 512, 1024, 2048];
+
+  var boardEl = document.getElementById('board');
+  var scoreEl = document.getElementById('score');
+  var bestEl = document.getElementById('best');
+  var scoreAddEl = document.getElementById('scoreAdd');
+  var overlay = document.getElementById('overlay');
+  var overlayTitle = document.getElementById('overlayTitle');
+  var overlayText = document.getElementById('overlayText');
+  var overlayScore = document.getElementById('overlayScore');
+  var overlayMainBtn = document.getElementById('overlayMainBtn');
+  var overlaySubBtn = document.getElementById('overlaySubBtn');
+  var overlayReviveBtn = document.getElementById('overlayReviveBtn');
+  var reviveBtnLabel = document.getElementById('reviveBtnLabel');
+  var reviveNote = document.getElementById('reviveNote');
+  var reviveToast = document.getElementById('reviveToast');
+  var adModal = document.getElementById('adModal');
+  var adCountdown = document.getElementById('adCountdown');
+  var adProgressBar = document.getElementById('adProgressBar');
+  var adStatus = document.getElementById('adStatus');
+  var adReviveBtn = document.getElementById('adReviveBtn');
+  var adCancelBtn = document.getElementById('adCancelBtn');
+  var storeModal = document.getElementById('storeModal');
+  var rankingModal = document.getElementById('rankingModal');
+  var helpModal = document.getElementById('helpModal');
+  var storeBuyBtn = document.getElementById('storeBuyBtn');
+  var maxTileLabel = document.getElementById('maxTileLabel');
+  var trackEl = document.getElementById('track');
+  var trackLabelsEl = document.getElementById('trackLabels');
+
+  var grid, score, best = 0, moves, merges, revives = 0, startedAt, timerId = null, elapsedBase = 0;
+  var history = [];
+  var wonOnce = false, over = false, keepPlaying = false;
+  var overPending = false, overTimerId = null;
+  var GAME_OVER_DELAY = 1200;
+  var REVIVE_BACK = 5;
+  var AD_SECONDS = 5;
+  var adTimerId = null, adStartedAt = 0, reviveToastTimerId = null;
+  var adMode = 'reward'; // 'reward' (復活) | 'interstitial' (再スタート時)
+  var adsRemoved = false; // 「広告を消す」購入済みかどうか（試作版ではセッション内のみ有効）
+  var storeFresh = false, storeTimerId = null; // storeFresh: 購入直後かどうか（完了画面の文言切り替え用）
+  var restartCount = 0;  // 再スタート回数。3回に1回インタースティシャル広告を出す
+  var AD_EVERY = 3;
+  var lastNew = null, lastMerged = {};
+  var soundOn = true;
+  var theme = 'classic';
+  var audioCtx = null;
+  var overlayKind = null; // 'win' | 'over' | null
+  var ranking = []; // 保存される記録（スコア順に保持、最大20件）
+  var rankSeq = 0, lastRankId = 0;
+  var overFinal = null;
+
+  /* ---------- persistence: ベストスコアとランキングをこの端末に保存 ---------- */
+  var SAVE_KEY = 'suuji-puzzle-2048-save-v1';
+  function saveProgress(){
+    try{
+      var data = {
+        best: best,
+        rankSeq: rankSeq,
+        lastRankId: lastRankId,
+        ranking: ranking.map(function(e){
+          return {
+            id: e.id, score: e.score, max: e.max, moves: e.moves, time: e.time,
+            at: (e.at && typeof e.at.toISOString === 'function') ? e.at.toISOString() : null
+          };
+        })
+      };
+      window.localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+    }catch(err){ /* 保存できない環境（プライベートモード等）では今まで通りメモリ内だけで動く */ }
+  }
+  function loadProgress(){
+    try{
+      var raw = window.localStorage.getItem(SAVE_KEY);
+      if(!raw) return;
+      var data = JSON.parse(raw);
+      if(!data || typeof data !== 'object') return;
+      if(typeof data.best === 'number' && isFinite(data.best) && data.best > 0) best = Math.floor(data.best);
+      if(typeof data.rankSeq === 'number' && isFinite(data.rankSeq) && data.rankSeq > 0) rankSeq = Math.floor(data.rankSeq);
+      if(typeof data.lastRankId === 'number' && isFinite(data.lastRankId)) lastRankId = data.lastRankId;
+      if(Array.isArray(data.ranking)){
+        var loaded = [];
+        data.ranking.forEach(function(e){
+          if(!e || typeof e !== 'object') return;
+          var sc = Number(e.score), mx = Number(e.max), mv = Number(e.moves), tm = Number(e.time);
+          if(!isFinite(sc) || sc <= 0) return;
+          var atDate = e.at ? new Date(e.at) : new Date();
+          if(isNaN(atDate.getTime())) atDate = new Date();
+          var id = (typeof e.id === 'number' && isFinite(e.id)) ? e.id : 0;
+          loaded.push({
+            id: id,
+            score: sc,
+            max: isFinite(mx) ? mx : 0,
+            moves: isFinite(mv) ? mv : 0,
+            time: isFinite(tm) ? tm : 0,
+            at: atDate
+          });
+          if(id > rankSeq) rankSeq = id;
+        });
+        loaded.sort(function(a, b){ return b.score - a.score || b.max - a.max || a.moves - b.moves; });
+        ranking = loaded.slice(0, 20);
+      }
+    }catch(err){ /* 壊れた保存データは無視して新規スタートにする */ }
+  }
+
+  /* ---------- i18n ---------- */
+  var I18N = {
+    ja: {
+      docTitle: '数字パズルゲーム',
+      titleText: '数字パズル',
+      subtitle: '同じ数字をくっつけて大きくしよう。<br>目標は <b>2048</b> のタイルを作ること。',
+      newGame: '新しいゲーム',
+      themeLabel: 'テーマ', themeAria: 'テーマ',
+      themeClassic: 'クラシック', themeOcean: 'オーシャン', themeSakura: 'さくら', themeForest: 'フォレスト', themeNeon: 'ネオン',
+      soundOn: '音あり', soundOff: '音なし',
+      progressLabel: '2048 までの道のり', progressAria: '2048までの進み具合',
+      maxTile: '最大タイル',
+      boardAria: 'ゲーム盤面。スワイプか矢印キーでタイルを動かします',
+      adAria: '広告',
+      playAgain: 'もう一度あそぶ', newGameOverlay: '新しいゲーム', keepPlaying: 'このまま続ける',
+      gameOver: 'ゲームオーバー', winTitle: '2048 達成！',
+      winText: 'お見事です。ここで終わりにするか、4096を目指して続けるか選べます。',
+      overText: function(max, mv){ return 'もう動かせる手がありません。<br>最大タイル <b>' + max + '</b> ・ ' + mv + '手 でした。'; },
+      overScore: function(s, max){ return 'SCORE ' + s + ' ／ 最大タイル ' + max; },
+      reviveBtn: function(n){ return '広告を見て ' + n + '手前から復活'; },
+      reviveAdBtn: function(n){ return n + '手前から復活する'; },
+      reviveNote: function(n){ return '広告を見ると、詰む少し手前（' + n + '手前）の状態から<br>スコア・盤面そのままで再開できます。'; },
+      reviveToast: function(n){ return n + '手前から再開しました'; },
+      adBadge: '広告 ・ サンプル',
+      adTitle: 'ここに広告が入ります',
+      adDesc: '試作版ではサンプル広告を表示しています。本番ではここに動画広告が流れ、見終わると復活できます。',
+      adDescInt: '試作版ではサンプル広告を表示しています。本番ではここに広告が流れ、終わると新しいゲームが始まります。',
+      adDoneInt: '広告が終わりました。新しいゲームを始められます。',
+      startGame: 'ゲームをはじめる',
+      adPlaying: '広告を再生中です。終わるまでお待ちください…',
+      adDone: '広告が終わりました。復活できます。',
+      adCancel: 'やめる', adReviveDefault: '復活する',
+      adLeft: function(n){ return 'あと ' + n + ' 秒'; },
+      adFinished: '広告終了',
+      storeBtn: '広告を消す', storeBtnDone: '広告なし',
+      storeAria: '広告を消す（課金）',
+      storeBadge: '課金 ・ サンプル', storeKind: '買い切り',
+      storeTitle: '広告を消して、快適にあそぶ',
+      storePrice: '¥480',
+      storeBenefit1: '再スタート時の広告が出なくなります',
+      storeBenefit2: 'ゲームオーバーの復活が、広告なしで使えます',
+      storeBenefit3: '一度の購入でずっと有効（買い切り）',
+      storeNote: '試作版では疑似購入です。実際のお支払いは発生しません（アプリ版ではApp Storeの課金に接続します）。',
+      storeBuy: function(p){ return p + ' で購入する'; },
+      storeBuying: '購入処理中…',
+      storeCancel: 'やめる', storeClose: '閉じる',
+      storeDoneTitle: '購入が完了しました',
+      storeDoneDesc: '広告は表示されなくなります。復活も広告を見ずに使えます。',
+      storeOwnedTitle: '広告なしが適用中です',
+      storeOwnedDesc: 'このゲームでは広告は表示されません。復活も広告なしで使えます。',
+      reviveFreeBtn: function(n){ return '広告なしで ' + n + '手前から復活'; },
+      reviveNoteFree: '購入済みのため、広告を見ずにそのまま復活できます。',
+      rankingBtn: 'ランキング',
+      rankingNote: '保存されたスコア順です。ゲームオーバーになると自動で追加され、ページを閉じてもこの端末に残ります。',
+      rankingEmpty: 'まだ記録がありません。<br>まずは1ゲーム、最後まで遊んでみてください。',
+      rankingCount: function(n){ return n + ' 件の記録'; },
+      rankingMeta: function(max, mv, time, at){ return '最大タイル ' + max + ' ・ ' + mv + '手 ・ ' + time + ' ・ ' + at; },
+      statMoves: '手数', statMerges: '合体回数', statMax: '最大タイル', statRevives: '復活', statTime: '経過時間',
+      dpadAria: '方向ボタン', dirUp: '上へ', dirDown: '下へ', dirLeft: '左へ', dirRight: '右へ',
+      howtoTitle: 'あそびかた',
+      helpBtn: 'あそびかた', closeLabel: '閉じる',
+      howtoItems: [
+        '盤面を<b>スワイプ</b>（PCは矢印キー）すると、タイルが全部その方向へ滑ります。',
+        '同じ数字どうしがぶつかると<b>合体して2倍</b>になります。2＋2＝4、4＋4＝8…',
+        '1手ごとに新しいタイル（2か4）が空きマスに現れます。',
+        '<b>2048</b>を作ればクリア。動かせる手がなくなるとゲームオーバーです。',
+        'ゲームオーバーになっても、<b>広告を見れば5手前</b>から復活できます。スコアと経過時間もその時点のものに戻ります（試作版では5秒のサンプル広告が流れます）。',
+        '「もう一度あそぶ」で再スタートするときは、<b>3回に1回</b>広告が表示されてから新しいゲームが始まります。',
+        '上の<b>テーマ</b>から、盤面とタイルの色をいつでも切り替えられます。プレイ中の盤面やスコアはそのまま引き継がれます。',
+        '「<b>広告を消す</b>」を購入すると、再スタート時の広告がなくなり、復活も広告なしで使えるようになります（試作版では疑似購入で、お支払いは発生しません）。',
+        '上の<b>ランキング</b>ボタンから、これまでのスコア順位を確認できます。ゲームオーバーになると自動で記録されます。'
+      ],
+      tip: 'コツ：いちばん大きい数字は<b>角に固定</b>して、そこから小さい順に並べていくと崩れにくくなります。',
+      keySwipe: 'スワイプ', keyDpad: '方向ボタン',
+      footerNote: '試作版です。遊んでみて「もっとこうしたい」があれば教えてください（制限時間モード、盤面サイズ変更など追加できます）。'
+    },
+    en: {
+      docTitle: 'Number Puzzle Game',
+      titleText: 'Number Puzzle',
+      subtitle: 'Merge matching numbers to grow them.<br>Your goal: make the <b>2048</b> tile.',
+      newGame: 'New Game',
+      themeLabel: 'Theme', themeAria: 'Theme',
+      themeClassic: 'Classic', themeOcean: 'Ocean', themeSakura: 'Sakura', themeForest: 'Forest', themeNeon: 'Neon',
+      soundOn: 'Sound on', soundOff: 'Sound off',
+      progressLabel: 'Road to 2048', progressAria: 'Progress toward 2048',
+      maxTile: 'Max tile',
+      boardAria: 'Game board. Swipe or use the arrow keys to move tiles',
+      adAria: 'Advertisement',
+      playAgain: 'Play again', newGameOverlay: 'New game', keepPlaying: 'Keep playing',
+      gameOver: 'Game Over', winTitle: 'You made 2048!',
+      winText: 'Great job! End here, or keep going and aim for 4096.',
+      overText: function(max, mv){ return 'No moves left.<br>Max tile <b>' + max + '</b> · ' + mv + ' moves.'; },
+      overScore: function(s, max){ return 'SCORE ' + s + ' / Max tile ' + max; },
+      reviveBtn: function(n){ return 'Watch an ad to revive ' + n + ' moves back'; },
+      reviveAdBtn: function(n){ return 'Revive ' + n + ' moves back'; },
+      reviveNote: function(n){ return 'Watch an ad to resume from just before you got stuck (' + n + ' moves back),<br>with your score and board as they were.'; },
+      reviveToast: function(n){ return 'Resumed ' + n + ' moves back'; },
+      adBadge: 'Ad · Sample',
+      adTitle: 'Your ad will appear here',
+      adDesc: 'This prototype shows a sample ad. In the release version a video ad plays here, and finishing it revives you.',
+      adDescInt: 'This prototype shows a sample ad. In the release version an ad plays here, and a new game starts when it ends.',
+      adDoneInt: 'Ad finished. You can start a new game.',
+      startGame: 'Start game',
+      adPlaying: 'Ad playing. Please wait until it ends…',
+      adDone: 'Ad finished. You can revive now.',
+      adCancel: 'Cancel', adReviveDefault: 'Revive',
+      adLeft: function(n){ return n + ' sec left'; },
+      adFinished: 'Ad finished',
+      storeBtn: 'Remove ads', storeBtnDone: 'No ads',
+      storeAria: 'Remove ads (in-app purchase)',
+      storeBadge: 'Purchase · Sample', storeKind: 'One-time',
+      storeTitle: 'Remove ads and play in comfort',
+      storePrice: '¥480',
+      storeBenefit1: 'No more ads when you restart',
+      storeBenefit2: 'Revive after game over without watching an ad',
+      storeBenefit3: 'One purchase, yours for good (no subscription)',
+      storeNote: 'This prototype uses a simulated purchase — no real payment is made (the app version will use App Store billing).',
+      storeBuy: function(p){ return 'Buy for ' + p; },
+      storeBuying: 'Processing…',
+      storeCancel: 'Cancel', storeClose: 'Close',
+      storeDoneTitle: 'Purchase complete',
+      storeDoneDesc: 'Ads will no longer appear, and you can revive without watching an ad.',
+      storeOwnedTitle: 'No-ads is active',
+      storeOwnedDesc: 'Ads will not appear in this game, and you can revive without watching an ad.',
+      reviveFreeBtn: function(n){ return 'Revive ' + n + ' moves back (no ad)'; },
+      reviveNoteFree: 'You have removed ads, so you can revive right away without watching one.',
+      rankingBtn: 'Ranking',
+      rankingNote: 'Your saved scores, best first. A score is added automatically when a game ends and stays on this device even after you close the page.',
+      rankingEmpty: 'No scores yet.<br>Play a game to the end to appear here.',
+      rankingCount: function(n){ return n + (n === 1 ? ' game' : ' games'); },
+      rankingMeta: function(max, mv, time, at){ return 'Max tile ' + max + ' · ' + mv + ' moves · ' + time + ' · ' + at; },
+      statMoves: 'Moves', statMerges: 'Merges', statMax: 'Max tile', statRevives: 'Revives', statTime: 'Time',
+      dpadAria: 'Direction pad', dirUp: 'Move up', dirDown: 'Move down', dirLeft: 'Move left', dirRight: 'Move right',
+      howtoTitle: 'How to play',
+      helpBtn: 'How to play', closeLabel: 'Close',
+      howtoItems: [
+        '<b>Swipe</b> the board (or use the arrow keys on PC) and all tiles slide in that direction.',
+        'When two tiles with the same number touch, they <b>merge and double</b>. 2+2=4, 4+4=8…',
+        'After each move, a new tile (2 or 4) appears in an empty cell.',
+        'Make <b>2048</b> to win. If no moves are left, it\'s game over.',
+        'Even after game over, you can <b>watch an ad to revive 5 moves back</b>. Your score and elapsed time also return to that point (in this prototype, a 5-second sample ad plays).',
+        'When you restart with "Play again", an ad appears <b>once every three restarts</b> before the new game begins.',
+        'Use <b>Theme</b> above the board to switch the board and tile colors anytime — your current game and score carry over.',
+        'Buy <b>Remove ads</b> and the restart ads disappear, and revives no longer need an ad (in this prototype the purchase is simulated — no payment is made).',
+        'Tap the <b>Ranking</b> button above to see your scores ranked. A score is added automatically when a game ends.'
+      ],
+      tip: 'Tip: Keep your biggest number <b>fixed in a corner</b> and line up smaller numbers next to it in order — your board will hold together much longer.',
+      keySwipe: 'Swipe', keyDpad: 'D-pad buttons',
+      footerNote: 'This is a prototype. Play it and tell me what you\'d like changed — a time-limit mode, different board sizes, and more can be added.'
+    }
+  };
+  var lang = (navigator.language && navigator.language.toLowerCase().indexOf('en') === 0) ? 'en' : 'ja';
+  function t(){ return I18N[lang]; }
+  function applyLang(){
+    var d = t();
+    document.documentElement.lang = lang;
+    document.title = d.docTitle;
+    document.getElementById('titleText').textContent = d.titleText;
+    document.getElementById('subtitle').innerHTML = d.subtitle;
+    document.getElementById('newGameLabel').textContent = d.newGame;
+    document.getElementById('themeLabelText').textContent = d.themeLabel;
+    document.getElementById('themeOptions').setAttribute('aria-label', d.themeAria);
+    document.querySelectorAll('[data-theme-name]').forEach(function(el){
+      var k = el.getAttribute('data-theme-name');
+      var key = 'theme' + k.charAt(0).toUpperCase() + k.slice(1);
+      if(d[key]) el.textContent = d[key];
+    });
+    document.getElementById('soundLabel').textContent = soundOn ? d.soundOn : d.soundOff;
+    document.getElementById('progressLabel').textContent = d.progressLabel;
+    document.getElementById('progressCard').setAttribute('aria-label', d.progressAria);
+    document.getElementById('maxTileText').textContent = d.maxTile;
+    boardEl.setAttribute('aria-label', d.boardAria);
+    adModal.setAttribute('aria-label', d.adAria);
+    document.getElementById('adBadge').textContent = d.adBadge;
+    document.getElementById('adTitle').textContent = d.adTitle;
+    document.getElementById('adDesc').textContent = adMode === 'interstitial' ? d.adDescInt : d.adDesc;
+    if(adMode === 'interstitial' && adModal.classList.contains('show')) adReviveBtn.textContent = d.startGame;
+    adCancelBtn.textContent = d.adCancel;
+    document.getElementById('storeBtnLabel').textContent = adsRemoved ? d.storeBtnDone : d.storeBtn;
+    storeModal.setAttribute('aria-label', d.storeAria);
+    document.getElementById('storeBadge').textContent = d.storeBadge;
+    document.getElementById('storeKind').textContent = d.storeKind;
+    document.getElementById('storeTitle').textContent = d.storeTitle;
+    document.getElementById('storePrice').textContent = d.storePrice;
+    document.getElementById('storeBenefit1').textContent = d.storeBenefit1;
+    document.getElementById('storeBenefit2').textContent = d.storeBenefit2;
+    document.getElementById('storeBenefit3').textContent = d.storeBenefit3;
+    document.getElementById('storeNote').textContent = d.storeNote;
+    if(!storeBuyBtn.disabled) storeBuyBtn.textContent = d.storeBuy(d.storePrice);
+    document.getElementById('storeCancelBtn').textContent = d.storeCancel;
+    document.getElementById('storeCloseBtn').textContent = d.storeClose;
+    if(adsRemoved){
+      document.getElementById('storeDoneTitle').textContent = storeFresh ? d.storeDoneTitle : d.storeOwnedTitle;
+      document.getElementById('storeDoneDesc').textContent = storeFresh ? d.storeDoneDesc : d.storeOwnedDesc;
+    }
+    document.getElementById('statMovesLabel').textContent = d.statMoves;
+    document.getElementById('statMergesLabel').textContent = d.statMerges;
+    document.getElementById('statMaxLabel').textContent = d.statMax;
+    document.getElementById('statRevivesLabel').textContent = d.statRevives;
+    document.getElementById('statTimeLabel').textContent = d.statTime;
+    document.getElementById('dpad').setAttribute('aria-label', d.dpadAria);
+    document.querySelectorAll('.dpad button[data-dir-label]').forEach(function(b){
+      var k = b.getAttribute('data-dir-label');
+      b.setAttribute('aria-label', k === 'up' ? d.dirUp : k === 'down' ? d.dirDown : k === 'left' ? d.dirLeft : d.dirRight);
+    });
+    document.getElementById('howtoTitle').textContent = d.howtoTitle;
+    document.getElementById('helpBadge').textContent = d.helpBtn;
+    helpModal.setAttribute('aria-label', d.helpBtn);
+    document.getElementById('helpBtn').setAttribute('aria-label', d.helpBtn);
+    document.getElementById('rankingBtn').setAttribute('aria-label', d.rankingBtn);
+    document.getElementById('rankingBadge').textContent = d.rankingBtn;
+    rankingModal.setAttribute('aria-label', d.rankingBtn);
+    document.getElementById('rankingCloseBtn').setAttribute('aria-label', d.closeLabel);
+    document.getElementById('rankingNote').textContent = d.rankingNote;
+    renderRanking();
+    document.getElementById('helpCloseBtn').setAttribute('aria-label', d.closeLabel);
+    document.getElementById('soundBtn').setAttribute('aria-label', soundOn ? d.soundOn : d.soundOff);
+    var items = document.querySelectorAll('#howtoList li');
+    d.howtoItems.forEach(function(html, i){ if(items[i]) items[i].innerHTML = html; });
+    document.getElementById('tipText').innerHTML = d.tip;
+    document.getElementById('keySwipe').textContent = d.keySwipe;
+    document.getElementById('keyDpad').textContent = d.keyDpad;
+    document.getElementById('footerNote').textContent = d.footerNote;
+    document.getElementById('langJaBtn').setAttribute('aria-pressed', String(lang === 'ja'));
+    document.getElementById('langEnBtn').setAttribute('aria-pressed', String(lang === 'en'));
+    // Rebuild whichever overlay is currently on screen
+    if(overlayKind === 'win' && overlay.classList.contains('show')){
+      overlayScore.textContent = 'SCORE ' + fmt(score);
+      overlayTitle.textContent = d.winTitle;
+      overlayText.innerHTML = d.winText;
+      overlayMainBtn.textContent = d.newGameOverlay;
+      overlaySubBtn.textContent = d.keepPlaying;
+    } else if(overlayKind === 'over' && overlay.classList.contains('show') && overFinal){
+      overlayScore.textContent = d.overScore(fmt(overFinal.score), fmt(overFinal.max));
+      overlayTitle.textContent = d.gameOver;
+      overlayText.innerHTML = d.overText(fmt(overFinal.max), fmt(overFinal.moves));
+      overlayMainBtn.textContent = d.playAgain;
+      if(history.length){
+        var steps = reviveSteps();
+        if(adsRemoved){
+          reviveBtnLabel.textContent = d.reviveFreeBtn(steps);
+          reviveNote.textContent = d.reviveNoteFree;
+        } else {
+          reviveBtnLabel.textContent = d.reviveBtn(steps);
+          adReviveBtn.textContent = d.reviveAdBtn(steps);
+          reviveNote.innerHTML = d.reviveNote(steps);
+        }
+      }
+    }
+    if(grid) render();
+  }
+  function setLang(next){
+    if(next === lang) { applyLang(); return; }
+    lang = next;
+    applyLang();
+  }
+
+  /* ---------- sound ---------- */
+  function beep(freq, dur, type, gain){
+    if(!soundOn) return;
+    try{
+      if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if(audioCtx.state === 'suspended') audioCtx.resume();
+      var o = audioCtx.createOscillator(), g = audioCtx.createGain();
+      o.type = type || 'sine'; o.frequency.value = freq;
+      g.gain.setValueAtTime(gain || 0.06, audioCtx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + dur);
+      o.connect(g); g.connect(audioCtx.destination);
+      o.start(); o.stop(audioCtx.currentTime + dur);
+    }catch(e){}
+  }
+  function sndMove(){ beep(220, .07, 'triangle', .045); }
+  function sndMerge(n){ beep(330 + Math.min(n,10)*28, .13, 'sine', .07); setTimeout(function(){ beep(495 + Math.min(n,10)*28, .12, 'sine', .05); }, 55); }
+  function sndWin(){ [523,659,784,1047].forEach(function(f,i){ setTimeout(function(){ beep(f,.22,'sine',.07); }, i*110); }); }
+  function sndOver(){ [392,330,262].forEach(function(f,i){ setTimeout(function(){ beep(f,.2,'triangle',.06); }, i*130); }); }
+
+  /* ---------- helpers ---------- */
+  function emptyGrid(){ var g=[]; for(var r=0;r<SIZE;r++){ g.push([0,0,0,0]); } return g; }
+  function clone(g){ return g.map(function(row){ return row.slice(); }); }
+  function emptyCells(){ var list=[]; for(var r=0;r<SIZE;r++) for(var c=0;c<SIZE;c++) if(grid[r][c]===0) list.push([r,c]); return list; }
+  function spawn(){
+    var cells = emptyCells(); if(!cells.length) return;
+    var pick = cells[Math.floor(Math.random()*cells.length)];
+    grid[pick[0]][pick[1]] = Math.random() < 0.9 ? 2 : 4;
+    lastNew = pick[0] + ',' + pick[1];
+  }
+  function maxTile(){ var m=0; for(var r=0;r<SIZE;r++) for(var c=0;c<SIZE;c++) if(grid[r][c]>m) m=grid[r][c]; return m; }
+  function fmt(n){ return n.toLocaleString(lang === 'en' ? 'en-US' : 'ja-JP'); }
+  function fontClass(v){ var d = String(v).length; return d<=2 ? 'fs-2' : d===3 ? 'fs-3' : d===4 ? 'fs-4' : 'fs-5'; }
+  function tileClass(v){ return v<=2048 ? 't'+v : 'tbig'; }
+
+  /* ---------- progress track ---------- */
+  MILESTONES.forEach(function(m){
+    var s = document.createElement('div'); s.className='seg'; s.id='seg-'+m; trackEl.appendChild(s);
+    var l = document.createElement('span'); l.id='segl-'+m; l.textContent = m; trackLabelsEl.appendChild(l);
+  });
+  var THEME_SEG_COLORS = {
+    classic: {128:'#ecc94b',256:'#e3b93e',512:'#5fb878',1024:'#2f9e6e',2048:'#0f766e'},
+    ocean:   {128:'#7fd1b9',256:'#4db894',512:'#2a9d8f',1024:'#1d7a6e',2048:'#0b3d5f'},
+    sakura:  {128:'#f6c177',256:'#eba94f',512:'#c86b98',1024:'#a44a7f',2048:'#7c2d4e'},
+    forest:  {128:'#e3c15c',256:'#d4a92e',512:'#5b8c5a',1024:'#386641',2048:'#1b4332'},
+    neon:    {128:'#f59e0b',256:'#f97316',512:'#22c55e',1024:'#14b8a6',2048:'#e879f9'}
+  };
+  function segColors(){ return THEME_SEG_COLORS[theme] || THEME_SEG_COLORS.classic; }
+  function renderProgress(){
+    var m = maxTile();
+    maxTileLabel.textContent = m ? fmt(m) : '–';
+    MILESTONES.forEach(function(ms){
+      var seg = document.getElementById('seg-'+ms), lab = document.getElementById('segl-'+ms);
+      var on = m >= ms;
+      seg.classList.toggle('on', on);
+      seg.style.background = on ? segColors()[ms] : '';
+      lab.classList.toggle('on', on);
+    });
+  }
+
+  /* ---------- render ---------- */
+  function render(){
+    boardEl.innerHTML = '';
+    for(var r=0;r<SIZE;r++){
+      for(var c=0;c<SIZE;c++){
+        var cell = document.createElement('div'); cell.className='cell';
+        var v = grid[r][c];
+        if(v){
+          var t = document.createElement('div');
+          t.className = 'tile ' + tileClass(v) + ' ' + fontClass(v);
+          if(lastNew === r+','+c) t.classList.add('new');
+          if(lastMerged[r+','+c]) t.classList.add('merged');
+          var s = document.createElement('span'); s.textContent = v;
+          t.appendChild(s); cell.appendChild(t);
+        }
+        boardEl.appendChild(cell);
+      }
+    }
+    scoreEl.textContent = fmt(score);
+    bestEl.textContent = fmt(best);
+    document.getElementById('statMoves').textContent = fmt(moves);
+    document.getElementById('statMerges').textContent = fmt(merges);
+    document.getElementById('statRevives').textContent = fmt(revives);
+    var m = maxTile();
+    document.getElementById('statMax').textContent = m ? fmt(m) : '–';
+    renderProgress();
+  }
+
+  function showScoreAdd(n){
+    scoreAddEl.textContent = '+' + fmt(n);
+    scoreAddEl.classList.remove('show');
+    void scoreAddEl.offsetWidth;
+    scoreAddEl.classList.add('show');
+  }
+
+  /* ---------- timer ---------- */
+  function fmtTime(sec){ var m = Math.floor(sec/60), s = sec%60; return m + ':' + (s<10?'0':'') + s; }
+  function startTimer(){
+    stopTimer();
+    startedAt = Date.now();
+    timerId = setInterval(function(){
+      document.getElementById('statTime').textContent = fmtTime(elapsedBase + Math.floor((Date.now()-startedAt)/1000));
+    }, 500);
+  }
+  function stopTimer(){ if(timerId){ clearInterval(timerId); timerId = null; } }
+  function currentElapsed(){ return elapsedBase + (startedAt ? Math.floor((Date.now()-startedAt)/1000) : 0); }
+
+  /* ---------- move logic ---------- */
+  function slideRow(row){
+    var arr = row.filter(function(v){ return v!==0; });
+    var gained = 0, mergeCount = 0, mergedIdx = [];
+    for(var i=0;i<arr.length-1;i++){
+      if(arr[i] === arr[i+1]){
+        arr[i] *= 2; gained += arr[i]; mergeCount++;
+        mergedIdx.push(i);
+        arr.splice(i+1,1);
+      }
+    }
+    while(arr.length < SIZE) arr.push(0);
+    return { row: arr, gained: gained, mergeCount: mergeCount, mergedIdx: mergedIdx };
+  }
+  function rotate(g){ // transpose
+    var n = emptyGrid();
+    for(var r=0;r<SIZE;r++) for(var c=0;c<SIZE;c++) n[c][r] = g[r][c];
+    return n;
+  }
+  function flip(g){ return g.map(function(row){ return row.slice().reverse(); }); }
+
+  function move(dir){
+    if(adModal.classList.contains('show') || storeModal.classList.contains('show') || helpModal.classList.contains('show') || rankingModal.classList.contains('show')) return;
+    if(over || overPending) return;
+    if(overlay.classList.contains('show') && !keepPlaying) return;
+    var work = clone(grid);
+    // normalize everything to "move left"
+    if(dir === 'up'){ work = rotate(work); }
+    if(dir === 'down'){ work = flip(rotate(work)); }
+    if(dir === 'right'){ work = flip(work); }
+
+    var gained = 0, mergeCount = 0, mergedPos = {};
+    var out = work.map(function(row, r){
+      var res = slideRow(row);
+      gained += res.gained; mergeCount += res.mergeCount;
+      res.mergedIdx.forEach(function(ci){ mergedPos[r+','+ci] = true; });
+      return res.row;
+    });
+
+    // rotate back
+    if(dir === 'right'){ out = flip(out); }
+    if(dir === 'down'){ out = rotate(flip(out)); }
+    if(dir === 'up'){ out = rotate(out); }
+
+    // map merged positions back to board coordinates
+    var boardMerged = {};
+    Object.keys(mergedPos).forEach(function(k){
+      var parts = k.split(','), r = +parts[0], c = +parts[1], br, bc;
+      if(dir === 'left'){ br=r; bc=c; }
+      if(dir === 'right'){ br=r; bc=SIZE-1-c; }
+      if(dir === 'up'){ br=c; bc=r; }
+      if(dir === 'down'){ br=SIZE-1-c; bc=r; }
+      boardMerged[br+','+bc] = true;
+    });
+
+    var changed = false;
+    for(var r2=0;r2<SIZE;r2++) for(var c2=0;c2<SIZE;c2++) if(out[r2][c2] !== grid[r2][c2]) changed = true;
+    if(!changed) return;
+
+    history.push({ grid: clone(grid), score: score, moves: moves, merges: merges, elapsed: currentElapsed() });
+    if(history.length > 60) history.shift();
+
+    grid = out;
+    score += gained; moves++; merges += mergeCount;
+    if(score > best){ best = score; saveProgress(); }
+    lastMerged = boardMerged;
+    lastNew = null;
+    spawn();
+
+    if(gained > 0){ showScoreAdd(gained); sndMerge(mergeCount); } else { sndMove(); }
+
+    var m = maxTile();
+    render();
+
+    if(m >= 2048 && !wonOnce){
+      wonOnce = true; keepPlaying = false; overlayKind = 'win';
+      sndWin();
+      overlayScore.textContent = 'SCORE ' + fmt(score);
+      overlayTitle.textContent = t().winTitle;
+      overlayText.innerHTML = t().winText;
+      overlayMainBtn.textContent = t().newGameOverlay;
+      overlaySubBtn.style.display = '';
+      overlaySubBtn.textContent = t().keepPlaying;
+      overlayReviveBtn.style.display = 'none';
+      reviveNote.style.display = 'none';
+      overlay.classList.add('show');
+      return;
+    }
+    if(!canMove()){
+      // 最後の盤面を少し見せてからゲームオーバー画面を出す
+      overPending = true;
+      var finalScore = score, finalMax = m, finalMoves = moves, finalTime = currentElapsed();
+      render();
+      overTimerId = setTimeout(function(){
+        overTimerId = null;
+        overPending = false;
+        over = true; stopTimer(); sndOver();
+        recordRanking(finalScore, finalMax, finalMoves, finalTime);
+        overlayKind = 'over';
+        overFinal = { score: finalScore, max: finalMax, moves: finalMoves };
+        overlayScore.textContent = t().overScore(fmt(finalScore), fmt(finalMax));
+        overlayTitle.textContent = t().gameOver;
+        overlayText.innerHTML = t().overText(fmt(finalMax), fmt(finalMoves));
+        overlayMainBtn.textContent = t().playAgain;
+        overlaySubBtn.style.display = 'none';
+        if(history.length){
+          var steps = Math.min(REVIVE_BACK, history.length);
+          if(adsRemoved){
+            reviveBtnLabel.textContent = t().reviveFreeBtn(steps);
+            reviveNote.textContent = t().reviveNoteFree;
+          } else {
+            reviveBtnLabel.textContent = t().reviveBtn(steps);
+            adReviveBtn.textContent = t().reviveAdBtn(steps);
+            reviveNote.innerHTML = t().reviveNote(steps);
+          }
+          overlayReviveBtn.style.display = '';
+          reviveNote.style.display = '';
+        } else {
+          overlayReviveBtn.style.display = 'none';
+          reviveNote.style.display = 'none';
+        }
+        overlay.classList.add('show');
+        render();
+      }, GAME_OVER_DELAY);
+    }
+  }
+
+  function canMove(){
+    if(emptyCells().length) return true;
+    for(var r=0;r<SIZE;r++) for(var c=0;c<SIZE;c++){
+      if(c+1<SIZE && grid[r][c]===grid[r][c+1]) return true;
+      if(r+1<SIZE && grid[r][c]===grid[r+1][c]) return true;
+    }
+    return false;
+  }
+
+  /* ---------- rewarded ad + revive ---------- */
+  function reviveSteps(){ return Math.min(REVIVE_BACK, history.length); }
+  function stopAd(){
+    if(adTimerId){ clearInterval(adTimerId); adTimerId = null; }
+    adModal.classList.remove('show');
+  }
+  function showReviveToast(steps){
+    reviveToast.textContent = t().reviveToast(steps);
+    reviveToast.classList.add('show');
+    if(reviveToastTimerId) clearTimeout(reviveToastTimerId);
+    reviveToastTimerId = setTimeout(function(){ reviveToast.classList.remove('show'); }, 2200);
+  }
+  // サンプル広告を再生し、終わったら action ボタンを有効化する（モード共通）
+  function runAd(doneText){
+    adReviveBtn.disabled = true;
+    adStatus.textContent = t().adPlaying;
+    adStatus.classList.remove('done');
+    adCountdown.textContent = t().adLeft(AD_SECONDS);
+    adProgressBar.style.width = '0%';
+    adModal.classList.add('show');
+    adStartedAt = Date.now();
+    if(adTimerId) clearInterval(adTimerId);
+    adTimerId = setInterval(function(){
+      var elapsed = (Date.now() - adStartedAt) / 1000;
+      var ratio = Math.min(elapsed / AD_SECONDS, 1);
+      adProgressBar.style.width = (ratio * 100) + '%';
+      var left = Math.max(AD_SECONDS - Math.floor(elapsed), 0);
+      adCountdown.textContent = ratio >= 1 ? t().adFinished : t().adLeft(left);
+      if(ratio >= 1){
+        clearInterval(adTimerId); adTimerId = null;
+        adStatus.textContent = doneText;
+        adStatus.classList.add('done');
+        adReviveBtn.disabled = false;
+        beep(660, .12, 'sine', .06);
+      }
+    }, 100);
+  }
+  function openAd(){
+    if(!over || !history.length) return;
+    adMode = 'reward';
+    overlay.classList.remove('show');
+    document.getElementById('adTitle').textContent = t().adTitle;
+    document.getElementById('adDesc').textContent = t().adDesc;
+    adCancelBtn.style.display = '';
+    adReviveBtn.textContent = t().reviveAdBtn(reviveSteps());
+    adReviveBtn.className = 'btn reward';
+    runAd(t().adDone);
+  }
+  function openInterstitial(){
+    adMode = 'interstitial';
+    overlay.classList.remove('show');
+    document.getElementById('adTitle').textContent = t().adTitle;
+    document.getElementById('adDesc').textContent = t().adDescInt;
+    adCancelBtn.style.display = 'none'; // インタースティシャルは閉じられない
+    adReviveBtn.textContent = t().startGame;
+    adReviveBtn.className = 'btn primary';
+    runAd(t().adDoneInt);
+  }
+  // 「もう一度あそぶ」「新しいゲーム」: 3回に1回だけ広告を挟んでから開始（購入済みなら広告なし）
+  function requestNewGame(){
+    if(overlayKind === 'win' && overlay.classList.contains('show')){
+      recordRanking(score, maxTile(), moves, currentElapsed());
+      overlayKind = null;
+    }
+    restartCount++;
+    if(!adsRemoved && restartCount % AD_EVERY === 0){
+      openInterstitial();
+    } else {
+      newGame();
+    }
+  }
+  function cancelAd(){
+    stopAd();
+    if(over) overlay.classList.add('show');
+  }
+  function doRevive(){
+    var steps = reviveSteps();
+    if(!steps) { stopAd(); return; }
+    var targetIndex = history.length - steps;
+    var target = history[targetIndex];
+    history = history.slice(0, targetIndex);
+    grid = clone(target.grid);
+    score = target.score; moves = target.moves; merges = target.merges;
+    elapsedBase = target.elapsed;
+    revives++;
+    over = false; keepPlaying = true; overPending = false; overlayKind = null; overFinal = null;
+    lastNew = null; lastMerged = {};
+    stopAd();
+    overlay.classList.remove('show');
+    render(); startTimer();
+    showReviveToast(steps);
+    sndWin();
+  }
+
+  /* ---------- store: 広告を消す課金（試作版では疑似購入） ---------- */
+  function updateStoreBtn(){
+    document.getElementById('storeBtnLabel').textContent = adsRemoved ? t().storeBtnDone : t().storeBtn;
+    document.getElementById('storeBtn').classList.toggle('owned', adsRemoved);
+    document.getElementById('storeIconAd').style.display = adsRemoved ? 'none' : '';
+    document.getElementById('storeIconCheck').style.display = adsRemoved ? '' : 'none';
+  }
+  function openStore(){
+    if(adModal.classList.contains('show')) return;
+    storeFresh = false;
+    if(adsRemoved){
+      document.getElementById('storeMain').style.display = 'none';
+      document.getElementById('storeDone').style.display = '';
+      document.getElementById('storeDoneTitle').textContent = t().storeOwnedTitle;
+      document.getElementById('storeDoneDesc').textContent = t().storeOwnedDesc;
+    } else {
+      document.getElementById('storeMain').style.display = '';
+      document.getElementById('storeDone').style.display = 'none';
+      storeBuyBtn.disabled = false;
+      storeBuyBtn.textContent = t().storeBuy(t().storePrice);
+    }
+    storeModal.classList.add('show');
+  }
+  function closeStore(){
+    if(storeTimerId){ clearTimeout(storeTimerId); storeTimerId = null; }
+    if(storeBuyBtn.disabled && !adsRemoved){
+      storeBuyBtn.disabled = false;
+      storeBuyBtn.textContent = t().storeBuy(t().storePrice);
+    }
+    storeModal.classList.remove('show');
+  }
+  function buyStore(){
+    if(adsRemoved || storeBuyBtn.disabled) return;
+    storeBuyBtn.disabled = true;
+    storeBuyBtn.textContent = t().storeBuying;
+    storeTimerId = setTimeout(function(){
+      storeTimerId = null;
+      adsRemoved = true; storeFresh = true;
+      updateStoreBtn();
+      // ゲームオーバー画面が出ている場合、復活ボタンの文言も広告なし用に切り替える
+      if(overlayKind === 'over' && history.length){
+        var steps = reviveSteps();
+        reviveBtnLabel.textContent = t().reviveFreeBtn(steps);
+        reviveNote.textContent = t().reviveNoteFree;
+      }
+      document.getElementById('storeMain').style.display = 'none';
+      document.getElementById('storeDone').style.display = '';
+      document.getElementById('storeDoneTitle').textContent = t().storeDoneTitle;
+      document.getElementById('storeDoneDesc').textContent = t().storeDoneDesc;
+      beep(660, .12, 'sine', .06);
+      setTimeout(function(){ beep(880, .16, 'sine', .06); }, 110);
+    }, 1200);
+  }
+
+  /* ---------- ranking ---------- */
+  function recordRanking(scoreVal, maxVal, movesVal, timeVal){
+    if(!scoreVal || scoreVal <= 0) return;
+    var entry = { id: ++rankSeq, score: scoreVal, max: maxVal, moves: movesVal, time: timeVal, at: new Date() };
+    ranking.push(entry);
+    ranking.sort(function(a, b){ return b.score - a.score || b.max - a.max || a.moves - b.moves; });
+    if(ranking.length > 20) ranking = ranking.slice(0, 20);
+    lastRankId = entry.id;
+    saveProgress();
+  }
+  function renderRanking(){
+    var d = t();
+    var list = document.getElementById('rankingList');
+    var empty = document.getElementById('rankingEmpty');
+    document.getElementById('rankingCount').textContent = ranking.length ? d.rankingCount(ranking.length) : '';
+    empty.innerHTML = d.rankingEmpty;
+    empty.style.display = ranking.length ? 'none' : '';
+    list.innerHTML = '';
+    ranking.slice(0, 10).forEach(function(e, i){
+      var li = document.createElement('li');
+      li.className = 'rank-row rank-pos-' + (i + 1) + (e.id === lastRankId ? ' latest' : '');
+      var num = document.createElement('div'); num.className = 'rank-num'; num.textContent = i + 1;
+      var main = document.createElement('div'); main.className = 'rank-main';
+      var sc = document.createElement('div'); sc.className = 'rank-score'; sc.textContent = fmt(e.score);
+      var meta = document.createElement('div'); meta.className = 'rank-meta';
+      var hh = e.at.getHours(), mm = e.at.getMinutes();
+      var at = (e.at.getMonth() + 1) + '/' + e.at.getDate() + ' ' + hh + ':' + (mm < 10 ? '0' : '') + mm;
+      meta.textContent = d.rankingMeta(fmt(e.max), fmt(e.moves), fmtTime(e.time), at);
+      main.appendChild(sc); main.appendChild(meta);
+      li.appendChild(num); li.appendChild(main);
+      if(e.id === lastRankId){
+        var tag = document.createElement('span'); tag.className = 'rank-new'; tag.textContent = 'NEW';
+        li.appendChild(tag);
+      }
+      list.appendChild(li);
+    });
+  }
+  function openRanking(){ renderRanking(); rankingModal.classList.add('show'); }
+  function closeRanking(){ rankingModal.classList.remove('show'); }
+
+  /* ---------- game control ---------- */
+  function newGame(){
+    if(overTimerId){ clearTimeout(overTimerId); overTimerId = null; }
+    stopAd();
+    if(reviveToastTimerId){ clearTimeout(reviveToastTimerId); reviveToastTimerId = null; }
+    reviveToast.classList.remove('show');
+    grid = emptyGrid(); score = 0; moves = 0; merges = 0; revives = 0;
+    history = []; wonOnce = false; over = false; keepPlaying = false; overPending = false;
+    overlayKind = null; overFinal = null;
+    lastNew = null; lastMerged = {}; elapsedBase = 0;
+    overlayReviveBtn.style.display = 'none';
+    reviveNote.style.display = 'none';
+    overlay.classList.remove('show');
+    spawn(); spawn();
+    document.getElementById('statTime').textContent = '0:00';
+    render(); startTimer();
+  }
+  document.getElementById('newGameBtn').addEventListener('click', requestNewGame);
+  overlayMainBtn.addEventListener('click', requestNewGame);
+  overlaySubBtn.addEventListener('click', function(){
+    keepPlaying = true; overlayKind = null;
+    overlay.classList.remove('show');
+    if(!timerId) startTimer();
+  });
+  overlayReviveBtn.addEventListener('click', function(){
+    if(adsRemoved){ doRevive(); } else { openAd(); }
+  });
+  document.getElementById('storeBtn').addEventListener('click', openStore);
+  document.getElementById('storeCancelBtn').addEventListener('click', closeStore);
+  document.getElementById('storeCloseBtn').addEventListener('click', closeStore);
+  storeBuyBtn.addEventListener('click', buyStore);
+  adCancelBtn.addEventListener('click', cancelAd);
+  adReviveBtn.addEventListener('click', function(){
+    if(adReviveBtn.disabled) return;
+    if(adMode === 'interstitial'){ stopAd(); newGame(); }
+    else doRevive();
+  });
+
+  var soundBtn = document.getElementById('soundBtn');
+  soundBtn.addEventListener('click', function(){
+    soundOn = !soundOn;
+    soundBtn.setAttribute('aria-pressed', String(soundOn));
+    document.getElementById('soundOnIcon').style.display = soundOn ? '' : 'none';
+    document.getElementById('soundOffIcon').style.display = soundOn ? 'none' : '';
+    document.getElementById('soundLabel').textContent = soundOn ? t().soundOn : t().soundOff;
+    soundBtn.setAttribute('aria-label', soundOn ? t().soundOn : t().soundOff);
+    if(soundOn) sndMove();
+  });
+
+  /* ---------- theme switch ---------- */
+  function setTheme(next){
+    if(!THEME_SEG_COLORS[next]) next = 'classic';
+    theme = next;
+    document.documentElement.setAttribute('data-theme', next);
+    // Neon is a dark skin: tell the browser so form controls / scrollbars match
+    document.documentElement.style.colorScheme = next === 'neon' ? 'dark' : '';
+    document.querySelectorAll('[data-theme-btn]').forEach(function(b){
+      b.setAttribute('aria-pressed', String(b.getAttribute('data-theme-btn') === next));
+    });
+    if(grid) renderProgress();
+  }
+  document.querySelectorAll('[data-theme-btn]').forEach(function(b){
+    b.addEventListener('click', function(){
+      var next = b.getAttribute('data-theme-btn');
+      if(next === theme) return;
+      setTheme(next);
+      sndMove();
+    });
+  });
+
+  /* ---------- language switch ---------- */
+  document.getElementById('langJaBtn').addEventListener('click', function(){ setLang('ja'); });
+  document.getElementById('langEnBtn').addEventListener('click', function(){ setLang('en'); });
+
+  /* ---------- help modal (あそびかた) ---------- */
+  function openHelp(){ helpModal.classList.add('show'); }
+  function closeHelp(){ helpModal.classList.remove('show'); }
+  document.getElementById('helpBtn').addEventListener('click', openHelp);
+  document.getElementById('helpCloseBtn').addEventListener('click', closeHelp);
+  helpModal.addEventListener('click', function(e){ if(e.target === helpModal) closeHelp(); });
+
+  /* ---------- ranking modal ---------- */
+  document.getElementById('rankingBtn').addEventListener('click', openRanking);
+  document.getElementById('rankingCloseBtn').addEventListener('click', closeRanking);
+  rankingModal.addEventListener('click', function(e){ if(e.target === rankingModal) closeRanking(); });
+
+  /* ---------- input: keyboard ---------- */
+  var KEYMAP = { ArrowLeft:'left', ArrowRight:'right', ArrowUp:'up', ArrowDown:'down',
+                 a:'left', d:'right', w:'up', s:'down', A:'left', D:'right', W:'up', S:'down' };
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape'){
+      if(helpModal.classList.contains('show')) closeHelp();
+      else if(rankingModal.classList.contains('show')) closeRanking();
+      else if(storeModal.classList.contains('show')) closeStore();
+      return;
+    }
+    var dir = KEYMAP[e.key];
+    if(dir){ e.preventDefault(); move(dir); }
+  });
+
+  /* ---------- input: dpad ---------- */
+  document.querySelectorAll('.dpad button[data-dir]').forEach(function(b){
+    b.addEventListener('click', function(){ move(b.getAttribute('data-dir')); });
+  });
+
+  /* ---------- input: swipe ---------- */
+  var tx = null, ty = null;
+  boardEl.addEventListener('touchstart', function(e){
+    var t = e.changedTouches[0]; tx = t.clientX; ty = t.clientY;
+  }, { passive: true });
+  boardEl.addEventListener('touchend', function(e){
+    if(tx === null) return;
+    var t = e.changedTouches[0];
+    var dx = t.clientX - tx, dy = t.clientY - ty;
+    tx = ty = null;
+    if(Math.max(Math.abs(dx), Math.abs(dy)) < 24) return;
+    move(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up'));
+  }, { passive: true });
+  var mx = null, my = null;
+  boardEl.addEventListener('mousedown', function(e){ mx = e.clientX; my = e.clientY; });
+  boardEl.addEventListener('mouseup', function(e){
+    if(mx === null) return;
+    var dx = e.clientX - mx, dy = e.clientY - my; mx = my = null;
+    if(Math.max(Math.abs(dx), Math.abs(dy)) < 30) return;
+    move(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up'));
+  });
+
+  loadProgress();
+  applyLang();
+  newGame();
+})();
+</script>
+</body>
+</html>
